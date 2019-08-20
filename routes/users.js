@@ -34,7 +34,7 @@ router.post("/register", (req, res) => {
     });
   } else {
     //validation email
-    User.findOne({ email }).then((user) => {
+    User.findOne({ "local.email": email }).then((user) => {
       if (user) {
         //user exist
         errors.push({ msg: "Email Already Registered" });
@@ -47,25 +47,30 @@ router.post("/register", (req, res) => {
         });
       } else {
         const newUser = new User({
-          name,
-          email,
-          password
+          "local.name": name,
+          "local.email": email,
+          "local.password": password
         });
         bcrypt
           .hash(password, 12)
           .then((password) => {
-            newUser.password = password
-            newUser.save()
+            newUser.local.password = password;
+            newUser
+              .save()
               .then((user) => {
-                req.flash("success_msg", "You are now registered and can log in");
+                req.flash(
+                  "success_msg",
+                  "You are now registered and can log in"
+                );
                 return res.redirect("/users/login");
-              }).catch(err => console.log(err))
-          }).catch(err => console.log(err))
+              })
+              .catch((err) => console.log(err));
+          })
+          .catch((err) => console.log(err));
       }
     });
   }
-})
-
+});
 
 //login...
 
@@ -80,10 +85,10 @@ router.post("/login", (req, res, next) => {
 });
 
 //logout...
-router.get('/logout', (req, res) => {
-  req.logOut()
-  req.flash('success_msg', 'You are logged out')
-  res.redirect('/users/login')
-})
+router.get("/logout", (req, res) => {
+  req.logOut();
+  req.flash("success_msg", "You are logged out");
+  res.redirect("/");
+});
 
-module.exports = router
+module.exports = router;
